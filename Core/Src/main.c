@@ -21,6 +21,8 @@
 #include "main.h"
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
+
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -60,12 +62,13 @@ char RxDataBuffer[128] =
 { 0 };
 
 uint8_t STATE_Display = 0;
-uint32_t timestamp = 0;
+uint64_t timestamp = 0;
+uint64_t timestampsin = 0;
 
 int a = 0;
 int mode = 0;
 uint16_t ADCin = 0;
-float VADCin =0;
+uint16_t VADCin =0;
 uint64_t _micro = 0;
 float dataOut = 0;
 uint8_t DACConfig = 0b0011;
@@ -74,10 +77,16 @@ uint16_t  NormalizedataOut =0;
 
 // sawtooth
 float F_sawtooth= 0;
-int Status_sawtooth= 0; // �?รา�?ห�?าย หรือ �?ว�?ำ
+int Status_sawtooth= 0;
 float Amplitude_sawtooth = 0;
 float VoltHigh_sawtooth = 3.3;
 float VoltLow_sawtooth  = 0;
+
+// sin
+float F_sin= 0;
+float Amplitude_sin= 0;
+float VoltHigh_sin= 3.3;
+float VoltLow_sin = 0;
 
 	enum _StateDisplay
 	{
@@ -167,6 +176,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
+		static uint64_t timestampsin =0;
+		static uint64_t timestamp =0;
+
 
 		/*Method 2 Interrupt Mode*/
 				HAL_UART_Receive_IT(&huart2,  (uint8_t*)RxDataBuffer, 32);
@@ -202,6 +214,7 @@ int main(void)
 						      	break;
 
 						      case '1':
+
 						        STATE_Display = StateDisplay_MenuSawtooth_Print;
 						        a=1;       //  (1 on)(0 off)
 						        mode =1;   // output
@@ -213,6 +226,11 @@ int main(void)
 						        break;
 						      case '2':
 						        STATE_Display = StateDisplay_MenuSine_Print;
+						        a=1;
+						        mode=2;
+						        timestampsin = micros();
+						        sprintf(TxDataBuffer, " Sine \r\n ");
+						          HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 						        break;
 						      case '3':
 						      	 STATE_Display =StateDisplay_MenuSquare_Print;
@@ -226,7 +244,7 @@ int main(void)
 						      break;
 
 
-						      //Menu 1
+						      //Menu 1 sawtooth
 
 						      case StateDisplay_MenuSawtooth_Print: //display state
 
@@ -246,6 +264,7 @@ int main(void)
 						      		           case 'd': // on/off
 						      		             if (a==0)
 						      		             {
+
 						      		            	 sprintf(TxDataBuffer, "Turned On \r\n");
 						      		            	 HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 						      		            	 a=1;
@@ -350,6 +369,128 @@ int main(void)
 						      		             break;
 						      		           }
 						      	break;
+						      	//Menu 2 sine
+
+						      	case StateDisplay_MenuSine_Print: //display state
+
+						      	sprintf(TxDataBuffer, "Sine \r\n a. +0.1 Hz \r\n s. -0.1 Hz \r\n d. On/Off \r\n x. Back \r\n g. V High +0.1V \r\n h. High -0.1V \r\n j. V Low +0.1V \r\n k. Low -0.1V  \r\n");
+						      	 HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+
+						      		STATE_Display = StateDisplay_MenuSine_WaitInput;
+						      		 break;
+
+						      		  case StateDisplay_MenuSine_WaitInput: //make decision state
+						      		 switch (inputchar)
+						      				{
+						      			 case -1:
+						      				 break;
+						      			 case 'd': // on/off
+
+						      				if (a==0)
+						      			 {
+
+						      				 sprintf(TxDataBuffer, "Turned On \r\n");
+						      				HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      				a=1;
+
+						      				 }
+						      			else if (a==1)
+						      				 {
+						      					a=0;
+						      				sprintf(TxDataBuffer, "Turned Off \r\n");
+						      				 HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+
+						      				 }
+						      				STATE_Display = StateDisplay_MenuSine_Print;
+
+						      				break;
+						      				case 'a':  // เพิ่มความถี่
+						      					timestampsin = micros();
+						      				a=1;
+						      				if(F_sin <10)
+						      				 {
+						      				F_sin+=0.1;
+						      				 sprintf(TxDataBuffer," Frequency is %d Hz \r\n" ,(int)F_sin);
+						      					HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      				 }
+						      				 else
+						      				 {
+						      				sprintf(TxDataBuffer," the highest frequency \r\n" );
+						      					HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      				}
+
+
+						      					  STATE_Display = StateDisplay_MenuSine_Print ;
+						      					   break;
+						      			  case 's': //  ลดความถี่
+						      				timestampsin = micros();
+						      						 a=1;
+						      			 F_sin=F_sin-0.1;
+						      				  sprintf(TxDataBuffer," Frequency is %d Hz \r\n" ,(int)F_sin);
+						      				 HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      				if(F_sin <=0)
+						      					  {
+						      					F_sin=0;
+
+						      					}
+
+						      				STATE_Display = StateDisplay_MenuSine_Print;
+
+						      				  break;
+
+						      				 case 'x': // back to main manu
+
+						      					 a=0;
+						      					 STATE_Display = StateDisplay_MenuRoot_Print;
+						      				 break;
+						      				 case 'g':// +V High
+
+						      			VoltHigh_sin =VoltHigh_sin +0.1;
+						      			if (VoltHigh_sin >=3.3)
+						      			{
+						      			VoltHigh_sin =3.3;
+						      			}
+						      			STATE_Display = StateDisplay_MenuSine_Print;
+						      			break;
+						      		 case 'h':// -V High
+
+						      			VoltHigh_sin =VoltHigh_sin -0.1;
+						      				if (VoltHigh_sin <=0)
+						      				{
+						      			VoltHigh_sin =0;
+						      			 	}
+						      				STATE_Display = StateDisplay_MenuSine_Print;
+						      				 break;
+						      				 case 'j':// +V Low
+
+						      				 VoltLow_sin =VoltLow_sin +0.1;
+						      				if (VoltLow_sin>=3.3)
+						      				 {
+						      				VoltLow_sin =3.3;
+						      				 }
+						      				STATE_Display = StateDisplay_MenuSine_Print;
+						      				 break;
+						      				 case 'k':// -V Low
+
+						      				 VoltLow_sin =VoltLow_sin -0.1;
+						      				if (VoltLow_sin <=0)
+						      				{
+						      				VoltLow_sin=0;
+						      				}
+						      				STATE_Display = StateDisplay_MenuSine_Print;
+						      				break;
+
+
+						      			default: //show error
+
+						      			 sprintf(TxDataBuffer, "unidentified input \r\n");
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      			  STATE_Display = StateDisplay_MenuSine_Print;
+						      			 break;
+
+
+						      				}
+						      	 break;
 
 						    }
 
@@ -362,6 +503,7 @@ int main(void)
 
 				   if(mode == 1)
 				  				{
+
 					   Amplitude_sawtooth = ((VoltHigh_sawtooth-VoltLow_sawtooth)/3.3)*4095;
 
 				  					if(F_sawtooth == 0 )
@@ -403,6 +545,32 @@ int main(void)
 				  					}
 				  				}
 
+
+				   else if(mode == 2)
+				  				{
+
+					   Amplitude_sin = (((VoltHigh_sin - VoltLow_sin)/3.3)*4095.0)/2.0;
+
+					   					if(F_sin == 0)
+					   					{
+
+					   						NormalizedataOut = dataOut;
+					   					}
+					   					else
+					   					{
+					   						dataOut = Amplitude_sin*sin(2*M_PI*F_sin*((micros() - timestampsin)/1000000.0));
+					   						dataOut += (Amplitude_sin);
+					   						NormalizedataOut = dataOut;
+					   					}
+
+				  				}
+				   else
+				   			{
+				   				dataOut = 0;
+				   				NormalizedataOut = dataOut;
+				   			}
+
+
 					}
 
 				  			if (hspi3.State == HAL_SPI_STATE_READY
@@ -411,6 +579,7 @@ int main(void)
 				  						{
 				  							MCP4922SetOutput(DACConfig, NormalizedataOut );
 				  						}
+
 
 					}
 			  VADCin = (ADCin)*(3.3/4095.0);

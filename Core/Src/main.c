@@ -68,7 +68,7 @@ uint64_t timestampsin = 0;
 int a = 0;
 int mode = 0;
 uint16_t ADCin = 0;
-uint16_t VADCin =0;
+float VADCin =0;
 uint64_t _micro = 0;
 float dataOut = 0;
 uint8_t DACConfig = 0b0011;
@@ -87,6 +87,13 @@ float F_sin= 0;
 float Amplitude_sin= 0;
 float VoltHigh_sin= 3.3;
 float VoltLow_sin = 0;
+// Square
+float F_Square= 0;
+
+float VoltHigh_Square= 3.3;
+float VoltLow_Square = 0;
+int duty = 100;
+
 
 	enum _StateDisplay
 	{
@@ -234,6 +241,8 @@ int main(void)
 						        break;
 						      case '3':
 						      	 STATE_Display =StateDisplay_MenuSquare_Print;
+						      	a=1;
+						      	mode=3;
 						      	break;
 						      default: // actully error , you can add error message
 						    	  sprintf(TxDataBuffer, "unidentified input \r\n");
@@ -490,7 +499,140 @@ int main(void)
 
 
 						      				}
+
 						      	 break;
+
+						      	//Menu 3
+//						      		case StateDisplay_MenuSquare_Print: //display state
+//
+//						      sprintf(TxDataBuffer, "Square \r\n a. +0.1 Hz \r\n s. -0.1 Hz \r\n d. On/Off \r\n x. Back \r\n g. V High +0.1V \r\n h. High -0.1V \r\n j. V Low +0.1V \r\n k. Low -0.1V  \r\n \r\n l. duty +10  \r\n \r\n p. duty -10  \r\n");
+//						       HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+//
+//						      	STATE_Display = StateDisplay_MenuSquare_WaitInput;
+//						      	break;
+//
+//						      	 case StateDisplay_MenuSquare_WaitInput: //make decision state
+//						      	 switch (inputchar)
+//						      		{
+//						      			case -1:
+//						      			 break;
+//						      			 case 'd': // on/off
+//
+//						      	if (a==0)
+//						      	 {
+//
+//						      	 sprintf(TxDataBuffer, "Turned On \r\n");
+//						      		HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+//						      		a=1;
+//
+//						      		 }
+//						      		else if (a==1)
+//						      			 {
+//						      		a=0;
+//						      		sprintf(TxDataBuffer, "Turned Off \r\n");
+//						      		 HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+//
+//						      		 }
+//						      		STATE_Display = StateDisplay_MenuSine_Print;
+//
+//						      		break;
+//						      			case 'a':  // เพิ่มความถี่
+//						      			timestampsin = micros();
+//						      			a=1;
+//						      			if(F_Square <10)
+//						      			{
+//						      			F_Square+=0.1;
+//						      			sprintf(TxDataBuffer," Frequency is %d Hz \r\n" ,(int)F_Square);
+//						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+//						      			 }
+//						      			 else
+//						      			 {
+//						      			sprintf(TxDataBuffer," the highest frequency \r\n" );
+//						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+//						      			}
+//
+//
+//						      			 STATE_Display = StateDisplay_MenuSquare_Print ;
+//						      			 break;
+//						      			case 's': //  ลดความถี่
+//
+//						      			 a=1;
+//						      			 F_Square=F_Square-0.1;
+//						      			 sprintf(TxDataBuffer," Frequency is %d Hz \r\n" ,(int)F_Square);
+//						      			 HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+//						      			if(F_Square <=0)
+//						      			{
+//						      			F_Square=0;
+//
+//						      			}
+//
+//						      			STATE_Display = StateDisplay_MenuSquare_Print;
+//
+//						      			 break;
+//
+//						      			 case 'x': // back to main manu
+//
+//						      			 a=0;
+//						      			STATE_Display = StateDisplay_MenuRoot_Print;
+//						      			 break;
+//						      			 case 'g':// +V High
+//
+//						      			VoltHigh_Square =VoltHigh_Square +0.1;
+//						      			if (VoltHigh_Square>=3.3)
+//						      				{
+//						      			VoltHigh_Square=3.3;
+//						      			}
+//						      			STATE_Display = StateDisplay_MenuSquare_Print;
+//						      		break;
+//						      			 case 'h':// -V High
+//
+//						      			VoltHigh_Square =VoltHigh_Square -0.1;
+//						      			if (VoltHigh_Square<=0)
+//						      			{
+//						      			VoltHigh_Square=0;
+//						      			}
+//						      			STATE_Display = StateDisplay_MenuSquare_Print;
+//						      			 break;
+//						      			 case 'j':// +V Low
+//
+//						      			 VoltLow_Square =VoltLow_Square +0.1;
+//						      			if (VoltLow_Square>=3.3)
+//						      			{
+//						      			VoltLow_Square =3.3;
+//						      			 }
+//						      			STATE_Display = StateDisplay_MenuSquare_Print;
+//						      			break;
+//						      			 case 'k':// -V Low
+//
+//						      			 VoltLow_Square =VoltLow_Square -0.1;
+//						      			if (VoltLow_Square <=0)
+//						      			{
+//						      			VoltLow_Square=0;
+//						      			}
+//						      			STATE_Display = StateDisplay_MenuSquare_Print;
+//						      			break;
+//						      			 case'l':
+//						      				 duty+=10;
+//						      				 if(duty >= 100);
+//						      				duty=10;
+//						      				STATE_Display = StateDisplay_MenuSquare_Print;
+//						      			case'p':
+//						      			 duty-=10;
+//						      			if(duty <= 0);
+//						      			duty=0;
+//						      				STATE_Display = StateDisplay_MenuSquare_Print;
+//
+//
+//						      			default: //show error
+//
+//						      			 sprintf(TxDataBuffer, "unidentified input \r\n");
+//						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+//						      			 STATE_Display = StateDisplay_MenuSquare_Print;
+//						      			break;
+//
+//						      		}
+//						      	 break;
+//
 
 						    }
 
@@ -564,6 +706,28 @@ int main(void)
 					   					}
 
 				  				}
+//				   else if(mode == 3)
+//				  				  				{
+//
+//					   if(F_Square ==0)
+//					   {
+//						   NormalizedataOut = dataOut;
+//					   }
+//					   else
+//					   {
+//					   if(duty ==0)
+//					   					   {
+//						   dataOut = ((VoltLow_Square/3.3)*4095.0);
+//						   NormalizedataOut = dataOut;
+//					   					   }
+//					   else if (duty ==100)
+//					   {
+//						   dataOut = ((VoltHigh_Square/3.3)*4095.0);
+//						   	 NormalizedataOut = dataOut;
+//					   }
+//					   }
+//
+//				  				  				}
 				   else
 				   			{
 				   				dataOut = 0;

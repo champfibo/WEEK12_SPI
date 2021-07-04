@@ -726,18 +726,28 @@ int main(void)
 						      			break;
 						      			 case'l':
 
-
-						      				 duty+=10;
-						      				 if(duty >= 100);
+						      				 if(duty+10 <100){
+						      				 duty=duty+10;
+						      				sprintf(TxDataBuffer," duty is %d \r\n",duty);
+						      				HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      				 }else if(duty +10  >= 100){
 						      				duty=100;
+						      				sprintf(TxDataBuffer,"Maximum duty 100 \r\n");
+						      				HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      				 }
 						      				STATE_Display = StateDisplay_MenuSquare_Print;
 						      				break;
 						      			case'p':
-
-						      			 duty-=10;
-
-						      			if(duty <= 0);
+						      				if(duty-10>0){
+						      			 duty=duty-10;
+						      			sprintf(TxDataBuffer," duty is %d \r\n",duty);
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      				}
+						      			else if(duty -10 <= 0){
 						      			duty=0;
+						      			sprintf(TxDataBuffer,"Lower duty 0 \r\n");
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      			}
 						      				STATE_Display = StateDisplay_MenuSquare_Print;
 						      				break;
 
@@ -835,15 +845,16 @@ int main(void)
 					   }
 					   else
 					   {
-					   if(time*0.0001<=(duty/100.0*(1/F_Square))&&c==0)
+						   r=duty/100.0*(1/F_Square);
+					   if(time*0.0001<=(duty/100.0*(1/F_Square)))
 					   {
-						   c=1;
+
 						   dataOut=(VoltHigh_Square)/3.3*4095.0;
 						   NormalizedataOut =dataOut;
 					   }
-					   else if(time*0.0001>=(duty/100.0*(1/F_Square)) && time*0.0001<= 1/F_Square &&c==1 )
+					   else if(time*0.0001>=(duty/100.0*(1/F_Square)) && time*0.0001<= 1/F_Square)
 					   {
-						   c=0;
+
 						   dataOut=(VoltLow_Square)/3.3*4095.0;
 						   NormalizedataOut =dataOut;
 					   }

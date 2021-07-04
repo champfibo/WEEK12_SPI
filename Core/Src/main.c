@@ -64,9 +64,14 @@ char RxDataBuffer[128] =
 uint8_t STATE_Display = 0;
 uint64_t timestamp = 0;
 uint64_t timestampsin = 0;
-
+float time =0;
 int a = 0;
+int c=0;
+int t=0;
 int mode = 0;
+float q=0;
+float w=0;
+float r=0;
 uint16_t ADCin = 0;
 float VADCin =0;
 uint64_t _micro = 0;
@@ -187,6 +192,7 @@ int main(void)
 		static uint64_t timestamp =0;
 
 
+
 		/*Method 2 Interrupt Mode*/
 				HAL_UART_Receive_IT(&huart2,  (uint8_t*)RxDataBuffer, 32);
 
@@ -294,7 +300,8 @@ int main(void)
 						      		             if(F_sawtooth <10)
 						      		             {
 						      		            	F_sawtooth+=0.1;
-						      		            	 sprintf(TxDataBuffer," Frequency is %d Hz \r\n" ,(int)F_sawtooth);
+						      		            	t=F_sawtooth*10;
+						      		            	sprintf(TxDataBuffer," F_sawtooth is [%d.%d] Hz \r\n" ,t/10,t%10);
 						      		            	 HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 						      		             }
 						      		             else
@@ -308,12 +315,17 @@ int main(void)
 						      		             break;
 						      		           case 's': //  ลดความถี่
 						      		        	   a=1;
+						      		        	   if(F_sawtooth- 0.1 >0){
 						      		        	 F_sawtooth=F_sawtooth-0.1;
-						      		           sprintf(TxDataBuffer," Frequency is %d Hz \r\n" ,(int)F_sawtooth);
-						      		           HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
-						      		         if(F_sawtooth- 0.1 <=0)
+						      		        	t=F_sawtooth*10;
+						      		        	sprintf(TxDataBuffer,"  F_sawtooth [%d.%d] Hz \r\n" ,t/10,t%10);
+						      		        	 HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      		        	   }
+						      		        	 else if(F_sawtooth- 0.1 <=0)
 						      		            {
 						      		        	F_sawtooth=0;
+						      		        	sprintf(TxDataBuffer," the Lower frequency \r\n" );
+						      		        	HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 
 						      		            }
 
@@ -342,31 +354,71 @@ int main(void)
 						      		         	 STATE_Display =StateDisplay_MenuSawtooth_Print;
 						      		         	 break;
 						      		         case 'g':// +V High
+						      		        	if(VoltHigh_sawtooth +0.1 <3.3){
 						      		        	VoltHigh_sawtooth =VoltHigh_sawtooth +0.1;
-						      		        	if (VoltHigh_sawtooth >=3.3)
+						      		        	t=VoltHigh_sawtooth*10;
+						      		        	sprintf(TxDataBuffer,"  VoltHigh_sawtooth is [%d.%d] V \r\n" ,t/10,t%10);
+						      		        	HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+
+						      		        	}
+						      		        	else
 						      		        	{
 						      		        		VoltHigh_sawtooth =3.3;
+						      		        		 sprintf(TxDataBuffer,"highest VoltHigh_sawtooth\r\n");
+						      		        		HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+
+						      		        		sprintf(TxDataBuffer,"  VoltHigh_sawtoothis 3.3 V \r\n" ,t/10,t%10);
+						      		        		HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+
 						      		        	}
 						      		        	break;
 						      		       case 'h':// -V High
+						      		    	   if(VoltHigh_sawtooth-0.1>0){
 						      		       	VoltHigh_sawtooth =VoltHigh_sawtooth -0.1;
-						      		       	if (VoltHigh_sawtooth <=0)
+						      		      t=VoltHigh_sawtooth*10;
+						      		      	sprintf(TxDataBuffer,"  VoltHigh_sawtoothis [%d.%d] V\r\n" ,t/10,t%10);
+						      		      	HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      		    	   }else if (VoltHigh_sawtooth-0.1 <=0)
 						      		       	{
 						      		       		VoltHigh_sawtooth =0;
+					      		        		 sprintf(TxDataBuffer,"lower VoltHigh_sawtooth\r\n");
+					      		        		HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+					      		        		 t=VoltHigh_sawtooth*10;
+					      		        		 sprintf(TxDataBuffer,"  VoltHigh_sawtoothis 0 V \r\n" ,t/10,t%10);
+					      		        			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 						      		       	}
 						      		      break;
 						      		     case 'j':// +V Low
+						      		    	 if(VoltLow_sawtooth +0.1 <3.3){
 						      		     VoltLow_sawtooth =VoltLow_sawtooth +0.1;
-						      		     if (VoltLow_sawtooth >=3.3)
+						      		   t=VoltLow_sawtooth*10;
+						      		  	sprintf(TxDataBuffer,"  VoltLow_sawtooth is [%d.%d] V \r\n" ,t/10,t%10);
+						      		   	HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      		    	 }
+						      		   	else if (VoltLow_sawtooth +0.1 >=3.3)
 						      		     {
 						      		    	VoltLow_sawtooth =3.3;
+						      		    	t=VoltLow_sawtooth*10;
+						      		    	sprintf(TxDataBuffer,"  VoltLow_sawtooth is 3.3 V \r\n" );
+						      		    	HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      		    	 sprintf(TxDataBuffer,"highest VoltLow_sawtooth");
+						      		    	HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 						      		     }
 						      		   break;
-						      		   case 'k':// +V Low
+						      		   case 'k':// -V Low
+						      			   if(VoltLow_sawtooth -0.1 >0){
 						      		  	 VoltLow_sawtooth =VoltLow_sawtooth -0.1;
-						      		  		 if (VoltLow_sawtooth <=0)
+						      		  	 t=VoltLow_sawtooth*10;
+						      		  	sprintf(TxDataBuffer,"  VoltLow_sawtooth is [%d.%d] V \r\n" ,t/10,t%10);
+						      		  		HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      			   }
+						      		  		else if (VoltLow_sawtooth -0.1<=0)
 						      		  		{
 						      		  		VoltLow_sawtooth =0;
+						      		  	sprintf(TxDataBuffer,"  VoltLow_sawtooth is 0 V \r\n" ,t/10,t%10);
+						      		  	HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      		  	sprintf(TxDataBuffer,"lower VoltLow_sawtooth");
+						      		  	HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 						      		  		}
 						      		  		break;
 
@@ -419,12 +471,13 @@ int main(void)
 						      				if(F_sin <10)
 						      				 {
 						      				F_sin+=0.1;
-						      				 sprintf(TxDataBuffer," Frequency is %d Hz \r\n" ,(int)F_sin);
-						      					HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      				t=F_sin*10;
+						      				sprintf(TxDataBuffer," F_sin is [%d.%d] Hz \r\n" ,t/10,t%10);
+						      				 HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 						      				 }
 						      				 else
 						      				 {
-						      				sprintf(TxDataBuffer," the highest frequency \r\n" );
+						      				sprintf(TxDataBuffer," the highest frequency 10Hz \r\n" );
 						      					HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 						      				}
 
@@ -434,12 +487,16 @@ int main(void)
 						      			  case 's': //  ลดความถี่
 						      				timestampsin = micros();
 						      						 a=1;
+						      						 if(F_sin-0.1>0){
 						      			 F_sin=F_sin-0.1;
-						      				  sprintf(TxDataBuffer," Frequency is %d Hz \r\n" ,(int)F_sin);
+						      			t=F_sin*10;
+						      			sprintf(TxDataBuffer," F_sin is [%d.%d] Hz \r\n" ,t/10,t%10);
 						      				 HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
-						      				if(F_sin <=0)
+						      						 }else if(F_sin-0.1<=0)
 						      					  {
 						      					F_sin=0;
+						      					sprintf(TxDataBuffer," the lower frequency 0 V \r\n" );
+						      					HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 
 						      					}
 
@@ -453,38 +510,62 @@ int main(void)
 						      					 STATE_Display = StateDisplay_MenuRoot_Print;
 						      				 break;
 						      				 case 'g':// +V High
-
+						      					if (VoltHigh_sin +0.1 <3.3){
 						      			VoltHigh_sin =VoltHigh_sin +0.1;
-						      			if (VoltHigh_sin >=3.3)
+						      			t=VoltHigh_sin*10;
+						      			sprintf(TxDataBuffer," VoltHigh_sin is [%d.%d] V \r\n" ,t/10,t%10);
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+
+						      					}
+						      					else if (VoltHigh_sin +0.1 >=3.3)
 						      			{
 						      			VoltHigh_sin =3.3;
+						      			sprintf(TxDataBuffer," Maximum VoltHigh_sin  3.3 V \r\n");
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 						      			}
 						      			STATE_Display = StateDisplay_MenuSine_Print;
 						      			break;
 						      		 case 'h':// -V High
-
+						      			 if(VoltHigh_sin -0.1>0){
 						      			VoltHigh_sin =VoltHigh_sin -0.1;
-						      				if (VoltHigh_sin <=0)
+						      			t=VoltHigh_sin*10;
+						      			sprintf(TxDataBuffer," VoltHigh_sin is [%d.%d] V \r\n" ,t/10,t%10);
+						      				HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      			 }
+						      				else if (VoltHigh_sin -0.1<=0)
 						      				{
 						      			VoltHigh_sin =0;
+						      			sprintf(TxDataBuffer," Lower  VoltHigh_sin  0 V \r\n");
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 						      			 	}
 						      				STATE_Display = StateDisplay_MenuSine_Print;
 						      				 break;
 						      				 case 'j':// +V Low
-
+						      				if (VoltLow_sin+0.1 <3.3){
 						      				 VoltLow_sin =VoltLow_sin +0.1;
-						      				if (VoltLow_sin>=3.3)
+						      				t=VoltLow_sin*10;
+						      				sprintf(TxDataBuffer," VoltLow_sinis [%d.%d] V \r\n" ,t/10,t%10);
+						      				HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      				}
+						      				else if (VoltLow_sin+0.1>=3.3)
 						      				 {
 						      				VoltLow_sin =3.3;
+						      				sprintf(TxDataBuffer," Maximum  VoltLow_sin  3.3 V \r\n");
+						      				HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 						      				 }
 						      				STATE_Display = StateDisplay_MenuSine_Print;
 						      				 break;
 						      				 case 'k':// -V Low
 
 						      				 VoltLow_sin =VoltLow_sin -0.1;
+						      				 t= VoltLow_sin*10;
+						      				sprintf(TxDataBuffer," VoltLow_sinis [%d.%d] V \r\n" ,t/10,t%10);
+						      				HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 						      				if (VoltLow_sin <=0)
 						      				{
 						      				VoltLow_sin=0;
+						      				sprintf(TxDataBuffer," Lower VoltLow_sin  0 V \r\n");
+						      				HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
 						      				}
 						      				STATE_Display = StateDisplay_MenuSine_Print;
 						      				break;
@@ -503,141 +584,179 @@ int main(void)
 						      	 break;
 
 						      	//Menu 3
-//						      		case StateDisplay_MenuSquare_Print: //display state
-//
-//						      sprintf(TxDataBuffer, "Square \r\n a. +0.1 Hz \r\n s. -0.1 Hz \r\n d. On/Off \r\n x. Back \r\n g. V High +0.1V \r\n h. High -0.1V \r\n j. V Low +0.1V \r\n k. Low -0.1V  \r\n \r\n l. duty +10  \r\n \r\n p. duty -10  \r\n");
-//						       HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
-//
-//						      	STATE_Display = StateDisplay_MenuSquare_WaitInput;
-//						      	break;
-//
-//						      	 case StateDisplay_MenuSquare_WaitInput: //make decision state
-//						      	 switch (inputchar)
-//						      		{
-//						      			case -1:
-//						      			 break;
-//						      			 case 'd': // on/off
-//
-//						      	if (a==0)
-//						      	 {
-//
-//						      	 sprintf(TxDataBuffer, "Turned On \r\n");
-//						      		HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
-//						      		a=1;
-//
-//						      		 }
-//						      		else if (a==1)
-//						      			 {
-//						      		a=0;
-//						      		sprintf(TxDataBuffer, "Turned Off \r\n");
-//						      		 HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
-//
-//						      		 }
-//						      		STATE_Display = StateDisplay_MenuSine_Print;
-//
-//						      		break;
-//						      			case 'a':  // เพิ่มความถี่
-//						      			timestampsin = micros();
-//						      			a=1;
-//						      			if(F_Square <10)
-//						      			{
-//						      			F_Square+=0.1;
-//						      			sprintf(TxDataBuffer," Frequency is %d Hz \r\n" ,(int)F_Square);
-//						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
-//						      			 }
-//						      			 else
-//						      			 {
-//						      			sprintf(TxDataBuffer," the highest frequency \r\n" );
-//						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
-//						      			}
-//
-//
-//						      			 STATE_Display = StateDisplay_MenuSquare_Print ;
-//						      			 break;
-//						      			case 's': //  ลดความถี่
-//
-//						      			 a=1;
-//						      			 F_Square=F_Square-0.1;
-//						      			 sprintf(TxDataBuffer," Frequency is %d Hz \r\n" ,(int)F_Square);
-//						      			 HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
-//						      			if(F_Square <=0)
-//						      			{
-//						      			F_Square=0;
-//
-//						      			}
-//
-//						      			STATE_Display = StateDisplay_MenuSquare_Print;
-//
-//						      			 break;
-//
-//						      			 case 'x': // back to main manu
-//
-//						      			 a=0;
-//						      			STATE_Display = StateDisplay_MenuRoot_Print;
-//						      			 break;
-//						      			 case 'g':// +V High
-//
-//						      			VoltHigh_Square =VoltHigh_Square +0.1;
-//						      			if (VoltHigh_Square>=3.3)
-//						      				{
-//						      			VoltHigh_Square=3.3;
-//						      			}
-//						      			STATE_Display = StateDisplay_MenuSquare_Print;
-//						      		break;
-//						      			 case 'h':// -V High
-//
-//						      			VoltHigh_Square =VoltHigh_Square -0.1;
-//						      			if (VoltHigh_Square<=0)
-//						      			{
-//						      			VoltHigh_Square=0;
-//						      			}
-//						      			STATE_Display = StateDisplay_MenuSquare_Print;
-//						      			 break;
-//						      			 case 'j':// +V Low
-//
-//						      			 VoltLow_Square =VoltLow_Square +0.1;
-//						      			if (VoltLow_Square>=3.3)
-//						      			{
-//						      			VoltLow_Square =3.3;
-//						      			 }
-//						      			STATE_Display = StateDisplay_MenuSquare_Print;
-//						      			break;
-//						      			 case 'k':// -V Low
-//
-//						      			 VoltLow_Square =VoltLow_Square -0.1;
-//						      			if (VoltLow_Square <=0)
-//						      			{
-//						      			VoltLow_Square=0;
-//						      			}
-//						      			STATE_Display = StateDisplay_MenuSquare_Print;
-//						      			break;
-//						      			 case'l':
-//						      				 duty+=10;
-//						      				 if(duty >= 100);
-//						      				duty=10;
-//						      				STATE_Display = StateDisplay_MenuSquare_Print;
-//						      			case'p':
-//						      			 duty-=10;
-//						      			if(duty <= 0);
-//						      			duty=0;
-//						      				STATE_Display = StateDisplay_MenuSquare_Print;
-//
-//
-//						      			default: //show error
-//
-//						      			 sprintf(TxDataBuffer, "unidentified input \r\n");
-//						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
-//						      			 STATE_Display = StateDisplay_MenuSquare_Print;
-//						      			break;
-//
-//						      		}
-//						      	 break;
-//
+						      		case StateDisplay_MenuSquare_Print: //display state
+
+						      sprintf(TxDataBuffer, "Square \r\n a. +0.1 Hz \r\n s. -0.1 Hz \r\n d. On/Off \r\n x. Back \r\n g. V High +0.1V \r\n h. High -0.1V \r\n j. V Low +0.1V \r\n k. Low -0.1V  \r\n \r\n l. duty +10  \r\n \r\n p. duty -10  \r\n");
+						       HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+
+						      	STATE_Display = StateDisplay_MenuSquare_WaitInput;
+						      	break;
+
+						      	 case StateDisplay_MenuSquare_WaitInput: //make decision state
+						      	 switch (inputchar)
+						      		{
+						      			case -1:
+						      			 break;
+						      			 case 'd': // on/off
+
+						      	if (a==0)
+						      	 {
+
+						      	 sprintf(TxDataBuffer, "Turned On \r\n");
+						      		HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      		a=1;
+
+						      		 }
+						      		else if (a==1)
+						      			 {
+						      		a=0;
+						      		sprintf(TxDataBuffer, "Turned Off \r\n");
+						      		 HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+
+						      		 }
+						      		STATE_Display = StateDisplay_MenuSquare_Print;
+
+						      		break;
+						      			case 'a':  // เพิ่มความถี่
+
+						      			a=1;
+						      			 c=0;
+						      			if(F_Square <10)
+						      			{
+						      			F_Square+=0.1;
+						      			t=F_Square*10;
+						      			sprintf(TxDataBuffer," F_Square is [%d.%d] Hz \r\n" ,t/10,t%10);
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      			 }
+						      			 else
+						      			 {
+						      			sprintf(TxDataBuffer," the highest frequency 10Hz \r\n" );
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      			}
+
+
+						      			 STATE_Display = StateDisplay_MenuSquare_Print ;
+						      			 break;
+						      			case 's': //  ลดความถี่
+						      				 c=0;
+
+						      			 a=1;
+						      			if(F_Square-0.1>0){
+						      			 F_Square=F_Square-0.1;
+						      			t=F_Square*10;
+						      			sprintf(TxDataBuffer," F_Square is [%d.%d] Hz \r\n" ,t/10,t%10);
+						      			 HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      			}
+						      			 else if(F_Square-0.1<=0)
+						      			{
+						      			F_Square=0;
+						      			sprintf(TxDataBuffer," the Lower frequency 0Hz \r\n" );
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+
+						      			}
+
+						      			STATE_Display = StateDisplay_MenuSquare_Print;
+
+						      			 break;
+
+						      			 case 'x': // back to main manu
+
+						      			 a=0;
+						      			STATE_Display = StateDisplay_MenuRoot_Print;
+						      			 break;
+						      			 case 'g':// +V High
+						      				if (VoltHigh_Square+0.1< 3.3){
+						      			VoltHigh_Square =VoltHigh_Square +0.1;
+						      			t=VoltHigh_Square*10;
+						      			sprintf(TxDataBuffer,"VoltHigh_Square is [%d.%d] V \r\n" ,t/10,t%10);
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      				}
+						      			else if (VoltHigh_Square+0.1>=3.3)
+						      			{
+						      			VoltHigh_Square=3.3;
+						      			sprintf(TxDataBuffer,"Maximum VoltHigh_Square is 3.3 V \r\n" ,t/10,t%10);
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      			}
+						      			STATE_Display = StateDisplay_MenuSquare_Print;
+						      		break;
+						      			 case 'h':// -V High
+						      				if (VoltHigh_Square-0.1>0){
+						      			VoltHigh_Square =VoltHigh_Square -0.1;
+						      			t=VoltHigh_Square*10;
+						      				sprintf(TxDataBuffer,"VoltHigh_Square is [%d.%d] V \r\n" ,t/10,t%10);
+						      				HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      				}
+						      			else if (VoltHigh_Square-0.1<=0)
+						      			{
+						      			VoltHigh_Square=0;
+						      			sprintf(TxDataBuffer,"Lower VoltHigh_Square is 0 V \r\n" ,t/10,t%10);
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      			}
+						      			STATE_Display = StateDisplay_MenuSquare_Print;
+						      			 break;
+						      			 case 'j':// +V Low
+						      				if (VoltLow_Square+0.1 <3.3){
+						      			 VoltLow_Square =VoltLow_Square +0.1;
+						      			t=VoltLow_Square*10;
+						      			sprintf(TxDataBuffer,"VoltLow_Square is [%d.%d] V \r\n" ,t/10,t%10);
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      				}
+						      			else if (VoltLow_Square+0.1>=3.3)
+						      			{
+						      			VoltLow_Square =3.3;
+						      			sprintf(TxDataBuffer,"Maximum VoltLow_Squareis 3.3 V \r\n" ,t/10,t%10);
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      			 }
+						      			STATE_Display = StateDisplay_MenuSquare_Print;
+						      			break;
+						      			 case 'k':// -V Low
+						      				if (VoltLow_Square -0.1 >0){
+						      			 VoltLow_Square =VoltLow_Square -0.1;
+						      			t=VoltLow_Square*10;
+						      			sprintf(TxDataBuffer,"VoltLow_Square is [%d.%d] V \r\n" ,t/10,t%10);
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      				}
+						      			 else if (VoltLow_Square -0.1 <=0)
+						      			{
+						      			VoltLow_Square=0;
+						      			sprintf(TxDataBuffer,"Lower VoltLow_Square is 0 V \r\n" ,t/10,t%10);
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      			}
+						      			STATE_Display = StateDisplay_MenuSquare_Print;
+						      			break;
+						      			 case'l':
+
+
+						      				 duty+=10;
+						      				 if(duty >= 100);
+						      				duty=100;
+						      				STATE_Display = StateDisplay_MenuSquare_Print;
+						      				break;
+						      			case'p':
+
+						      			 duty-=10;
+
+						      			if(duty <= 0);
+						      			duty=0;
+						      				STATE_Display = StateDisplay_MenuSquare_Print;
+						      				break;
+
+
+						      			default: //show error
+
+						      			 sprintf(TxDataBuffer, "unidentified input \r\n");
+						      			HAL_UART_Transmit(&huart2, (uint8_t*)TxDataBuffer, strlen(TxDataBuffer), 1000);
+						      			 STATE_Display = StateDisplay_MenuSquare_Print;
+						      			break;
+
+						      		}
+						      	 break;
+
 
 						    }
 
 			// เเสดงกราฟ
-			  if (micros() - timestamp > 100)
+			  if (micros() - timestamp >= 100)
 					{
 				  timestamp = micros();
 				  			if(a == 1)
@@ -701,33 +820,42 @@ int main(void)
 					   					else
 					   					{
 					   						dataOut = Amplitude_sin*sin(2*M_PI*F_sin*((micros() - timestampsin)/1000000.0));
-					   						dataOut += (Amplitude_sin);
+					   						dataOut += (Amplitude_sin+((VoltLow_sin)/3.3)*4095.0); // shilf graft
 					   						NormalizedataOut = dataOut;
 					   					}
 
 				  				}
-//				   else if(mode == 3)
-//				  				  				{
-//
-//					   if(F_Square ==0)
-//					   {
-//						   NormalizedataOut = dataOut;
-//					   }
-//					   else
-//					   {
-//					   if(duty ==0)
-//					   					   {
-//						   dataOut = ((VoltLow_Square/3.3)*4095.0);
-//						   NormalizedataOut = dataOut;
-//					   					   }
-//					   else if (duty ==100)
-//					   {
-//						   dataOut = ((VoltHigh_Square/3.3)*4095.0);
-//						   	 NormalizedataOut = dataOut;
-//					   }
-//					   }
-//
-//				  				  				}
+				   else if(mode == 3)
+				  				  				{
+					   time = time+1;
+
+					   if(F_Square ==0)
+					   {
+						   NormalizedataOut = dataOut;
+					   }
+					   else
+					   {
+					   if(time*0.0001<=(duty/100.0*(1/F_Square))&&c==0)
+					   {
+						   c=1;
+						   dataOut=(VoltHigh_Square)/3.3*4095.0;
+						   NormalizedataOut =dataOut;
+					   }
+					   else if(time*0.0001>=(duty/100.0*(1/F_Square)) && time*0.0001<= 1/F_Square &&c==1 )
+					   {
+						   c=0;
+						   dataOut=(VoltLow_Square)/3.3*4095.0;
+						   NormalizedataOut =dataOut;
+					   }
+					   else
+					   {
+						   time=0;
+					   }
+
+					   }
+
+				  				  				}
+				  			}
 				   else
 				   			{
 				   				dataOut = 0;
@@ -735,13 +863,13 @@ int main(void)
 				   			}
 
 
-					}
+
 
 				  			if (hspi3.State == HAL_SPI_STATE_READY
 				  								&& HAL_GPIO_ReadPin(SPI_SS_GPIO_Port, SPI_SS_Pin)
 				  										== GPIO_PIN_SET)
 				  						{
-				  							MCP4922SetOutput(DACConfig, NormalizedataOut );
+				  							MCP4922SetOutput(DACConfig,NormalizedataOut );
 				  						}
 
 
